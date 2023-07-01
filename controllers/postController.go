@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -20,10 +19,10 @@ func PostCreate(c *gin.Context) {
 		Quest: models.QuestStructure{Content: "content", Character: "Character1",
 			QuestReward: models.QuestDescription{
 				QuestgiverName:               "QGname",
-				RewardLp:                     "1024",
-				RewardExp:                    "2048",
-				RewardLocalQuality:           "Auroch",
-				RewardLocalQualityAdditional: "",
+				RewardLp:                     "",
+				RewardExp:                    "",
+				RewardLocalQuality:           "",
+				RewardLocalQualityAdditional: "Fox",
 				RewardBy:                     "1",
 				RewardItem:                   "",
 			}},
@@ -47,7 +46,7 @@ func GetAll(c *gin.Context) {
 	initializers.DB.Preload("Quest.QuestReward").Find(&qt)
 
 	c.JSON(200, gin.H{
-		"all": qt,
+		"array": qt,
 	})
 
 }
@@ -68,7 +67,6 @@ func GetDescriptions(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"structures": qd,
 	})
-
 }
 
 func GetDescription(c *gin.Context) {
@@ -159,62 +157,6 @@ func printRecievedQuest(questTime models.QuestTime) {
 	}
 
 	fmt.Println("---------")
-}
-
-func HandleJson(w http.ResponseWriter, r *http.Request) {
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-
-	var receivedQuest models.QuestStructure
-	err = json.Unmarshal(body, &receivedQuest)
-	checkError(err)
-	w.WriteHeader(http.StatusOK)
-
-	var questTime models.QuestTime
-	questTime.Time = time.Now().Unix()
-	questTime.Quest = receivedQuest
-
-	fmt.Println("---------")
-
-	fmt.Println("Time is " + string(strconv.FormatInt(questTime.Time, 10)))
-	fmt.Println("	 Character:" + questTime.Quest.Character)
-	fmt.Println("	 Content:" + questTime.Quest.Content)
-	if len(questTime.Quest.QuestReward.QuestgiverName) != 0 {
-		fmt.Println("	 	QG:" + questTime.Quest.QuestReward.QuestgiverName)
-	}
-	if len(questTime.Quest.QuestReward.RewardLp) != 0 {
-		fmt.Println("		LP:" + questTime.Quest.QuestReward.RewardLp)
-	}
-	if len(questTime.Quest.QuestReward.RewardExp) != 0 {
-		fmt.Println("		EXP:" + questTime.Quest.QuestReward.RewardExp)
-	}
-	if len(questTime.Quest.QuestReward.RewardLocalQuality) != 0 {
-		fmt.Println("		LocalQ:" + questTime.Quest.QuestReward.RewardLocalQuality)
-	}
-	if len(questTime.Quest.QuestReward.RewardLocalQualityAdditional) != 0 {
-		fmt.Println("		LocalQAdd:" + questTime.Quest.QuestReward.RewardLocalQualityAdditional)
-	}
-	if len(questTime.Quest.QuestReward.RewardBy) != 0 {
-		fmt.Println("		LocalQ by:" + questTime.Quest.QuestReward.RewardBy)
-	}
-	if len(questTime.Quest.QuestReward.RewardItem) != 0 {
-		fmt.Println("		Item:" + questTime.Quest.QuestReward.RewardItem)
-	}
-
-	fmt.Println("---------")
-
-	//save to DB
-	result := initializers.DB.Create(&questTime)
-
-	if result.Error != nil {
-		fmt.Println(result.Error.Error())
-		return
-	}
-
 }
 
 func checkError(err error) {
