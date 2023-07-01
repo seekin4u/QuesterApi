@@ -8,32 +8,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetQGs(c *gin.Context) {
+func GetQgs(c *gin.Context) {
 	var qgs []models.QuestDescription
 	initializers.DB.Distinct("questgiver_name").Find(&qgs)
 
+	var npcList []string
+
+	for _, el := range qgs {
+		if !contains(npcList, el.QuestgiverName) {
+			npcList = append(npcList, el.QuestgiverName)
+		}
+	}
+
 	fmt.Println(qgs)
 	c.JSON(200, gin.H{
-		"qgs": qgs,
+		"qgs": npcList,
 	})
 }
 
-// передавать[] из []models.QuestDescription
-// каждый элемент в себе будет нести список QuestDescription
-// с разным инаградами, .questGiverName везде будет один
-func GetQGsQs(c *gin.Context) {
-	var qg []models.QuestDescription
-	initializers.DB.Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").Find(&qg)
+func GetQgQs(c *gin.Context) {
+	npc := c.Param("npc")
+	if len(npc) == 0 {
+		npc = ""
+	}
+
+	var qds []models.QuestDescription
+	initializers.DB.Where("questgiver_name = ?", npc).
+		Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").
+		Find(&qds)
+
+	var qualities []string
+	for _, val := range qds {
+		if len(val.RewardLocalQuality) != 0 && !contains(qualities, val.RewardLocalQuality) {
+			qualities = append(qualities, val.RewardLocalQuality)
+		} else if len(val.RewardLocalQualityAdditional) != 0 && !contains(qualities, val.RewardLocalQualityAdditional) {
+			qualities = append(qualities, val.RewardLocalQualityAdditional)
+		}
+	}
 
 	c.JSON(200, gin.H{
-		"qgsqs": qg,
+		"qg": npc,
+		"ql": qualities,
 	})
 }
 
-func GetQGGeneral(c *gin.Context) {
-	var questgiver models.QuestDescription
-	initializers.DB.Where("questgiver_name = ?", "QGname").Find(&questgiver)
-
+func GetQgQlGeneric(c *gin.Context) {
 	var qualities []models.QuestDescription
 	initializers.DB.Where("questgiver_name = ?", "QGname").Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").Find(&qualities)
 
@@ -44,16 +63,15 @@ func GetQGGeneral(c *gin.Context) {
 		} else if len(val.RewardLocalQualityAdditional) != 0 && !contains(quality, val.RewardLocalQualityAdditional) {
 			quality = append(quality, val.RewardLocalQualityAdditional)
 		}
-
 	}
 
 	c.JSON(200, gin.H{
-		"qg": questgiver.QuestgiverName,
+		"qg": "QGname",
 		"ql": quality,
 	})
 }
 
-func GetQGSpecial(c *gin.Context) {
+func GetQgSpecial(c *gin.Context) {
 	npc := c.Param("npc")
 	if len(npc) == 0 {
 		npc = ""

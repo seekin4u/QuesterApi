@@ -16,9 +16,9 @@ func PostCreate(c *gin.Context) {
 
 	questTime := models.QuestTime{
 		Time: time.Now().Unix(),
-		Quest: models.QuestStructure{Content: "content", Character: "Character1",
+		Quest: models.QuestStructure{Content: "Test client", Character: "NORDS",
 			QuestReward: models.QuestDescription{
-				QuestgiverName:               "QGname",
+				QuestgiverName:               "",
 				RewardLp:                     "",
 				RewardExp:                    "",
 				RewardLocalQuality:           "",
@@ -51,15 +51,6 @@ func GetAll(c *gin.Context) {
 
 }
 
-func GetAllQ(c *gin.Context) {
-	var qd []models.QuestDescription
-	initializers.DB.Where("questgiver_name = ?", "QGname").Find(&qd)
-
-	c.JSON(200, gin.H{
-		"GCname": qd,
-	})
-}
-
 func GetDescriptions(c *gin.Context) {
 	var qd []models.QuestDescription
 	initializers.DB.Find(&qd)
@@ -88,11 +79,11 @@ func GetStructure(c *gin.Context) {
 }
 
 func GetStructures(c *gin.Context) {
-	var qd []models.QuestStructure
-	initializers.DB.Find(&qd)
+	var st []models.QuestStructure
+	initializers.DB.Preload("QuestReward").Find(&st)
 
 	c.JSON(200, gin.H{
-		"descriptions": qd,
+		"structures": st,
 	})
 }
 
@@ -157,10 +148,4 @@ func printRecievedQuest(questTime models.QuestTime) {
 	}
 
 	fmt.Println("---------")
-}
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Println(err)
-	}
 }
