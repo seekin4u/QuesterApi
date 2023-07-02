@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetQgs(c *gin.Context) {
+func GetQuestgivers(c *gin.Context) {
 	var qgs []models.QuestDescription
 	initializers.DB.Distinct("questgiver_name").Find(&qgs)
 
@@ -26,7 +26,7 @@ func GetQgs(c *gin.Context) {
 	})
 }
 
-func GetQgQs(c *gin.Context) {
+func GetQuestgiverQualities(c *gin.Context) {
 	npc := c.Param("npc")
 	if len(npc) == 0 {
 		npc = ""
@@ -34,6 +34,52 @@ func GetQgQs(c *gin.Context) {
 
 	var qds []models.QuestDescription
 	initializers.DB.Where("questgiver_name = ?", npc).
+		Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").
+		Find(&qds)
+
+	var qualities []string
+	for _, val := range qds {
+		if len(val.RewardLocalQuality) != 0 && !contains(qualities, val.RewardLocalQuality) {
+			qualities = append(qualities, val.RewardLocalQuality)
+		} else if len(val.RewardLocalQualityAdditional) != 0 && !contains(qualities, val.RewardLocalQualityAdditional) {
+			qualities = append(qualities, val.RewardLocalQualityAdditional)
+		}
+	}
+
+	c.JSON(200, gin.H{
+		"qg": npc,
+		"ql": qualities,
+	})
+}
+
+func GetQuestgiverQuests(c *gin.Context) {
+	npc := c.Param("npc")
+	if len(npc) == 0 {
+		npc = ""
+	}
+
+	var quests []models.QuestTime
+	initializers.DB.
+		Joins("JOIN quest_structures on quest_structures.id=quest_id").
+		Joins("JOIN quest_descriptions on quest_descriptions.id=quest_reward_id").
+		Where("questgiver_name = ?", npc).
+		Preload("Quest.QuestReward").
+		Find(&quests)
+
+	c.JSON(200, gin.H{
+		"array": quests,
+	})
+}
+
+func GetQuestgiverQualitiesQuests(c *gin.Context) {
+	npc := c.Param("npc")
+	if len(npc) == 0 {
+		npc = ""
+	}
+
+	var qds []models.QuestDescription
+	initializers.DB.
+		Where("questgiver_name = ?", npc).
 		Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").
 		Find(&qds)
 
@@ -71,7 +117,7 @@ func GetQgQlGeneric(c *gin.Context) {
 	})
 }
 
-func GetQgSpecial(c *gin.Context) {
+func GetQuestgiver(c *gin.Context) {
 	npc := c.Param("npc")
 	if len(npc) == 0 {
 		npc = ""
@@ -83,6 +129,52 @@ func GetQgSpecial(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"ql": qualities,
 	})
+}
+
+func GetQualities(c *gin.Context) {
+
+	var qls []models.QuestDescription
+	initializers.DB.
+		Distinct("reward_local_quality", "reward_local_quality_additional").
+		Find(&qls)
+
+	var qualities []string
+
+	for _, el := range qls {
+		if len(el.RewardLocalQuality) != 0 && !contains(qualities, el.RewardLocalQuality) {
+			qualities = append(qualities, el.RewardLocalQuality)
+		} else if len(el.RewardLocalQualityAdditional) != 0 && !contains(qualities, el.RewardLocalQualityAdditional) {
+			qualities = append(qualities, el.RewardLocalQualityAdditional)
+		}
+	}
+
+	c.JSON(200, gin.H{
+		"qls": qualities,
+	})
+
+}
+
+func GetQualityQuestgivers(c *gin.Context) {
+
+	var qls []models.QuestDescription
+	initializers.DB.
+		Distinct("reward_local_quality", "reward_local_quality_additional").
+		Find(&qls)
+
+	var qualities []string
+
+	for _, el := range qls {
+		if len(el.RewardLocalQuality) != 0 && !contains(qualities, el.RewardLocalQuality) {
+			qualities = append(qualities, el.RewardLocalQuality)
+		} else if len(el.RewardLocalQualityAdditional) != 0 && !contains(qualities, el.RewardLocalQualityAdditional) {
+			qualities = append(qualities, el.RewardLocalQualityAdditional)
+		}
+	}
+
+	c.JSON(200, gin.H{
+		"qls": qualities,
+	})
+
 }
 
 func contains(s []string, e string) bool {

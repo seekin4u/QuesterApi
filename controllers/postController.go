@@ -120,32 +120,34 @@ func PostCreateFromJson(c *gin.Context) {
 }
 
 func printRecievedQuest(questTime models.QuestTime) {
-	fmt.Println("---------")
+	fmt.Print("{")
 
-	fmt.Println("Time is " + string(strconv.FormatInt(questTime.Time, 10)))
-	fmt.Println("	 Character:" + questTime.Quest.Character)
-	fmt.Println("	 Content:" + questTime.Quest.Content)
+	fmt.Print(string(strconv.FormatInt(questTime.Time, 10)))
+	fmt.Print(" " + questTime.Quest.Character)
+	fmt.Print(":" + questTime.Quest.Content)
+	fmt.Print(" {")
 	if len(questTime.Quest.QuestReward.QuestgiverName) != 0 {
-		fmt.Println("	 	QG:" + questTime.Quest.QuestReward.QuestgiverName)
+		fmt.Print("QG:" + questTime.Quest.QuestReward.QuestgiverName)
 	}
 	if len(questTime.Quest.QuestReward.RewardLp) != 0 {
-		fmt.Println("		LP:" + questTime.Quest.QuestReward.RewardLp)
+		fmt.Print(" LP:" + questTime.Quest.QuestReward.RewardLp)
 	}
 	if len(questTime.Quest.QuestReward.RewardExp) != 0 {
-		fmt.Println("		EXP:" + questTime.Quest.QuestReward.RewardExp)
+		fmt.Print(" EXP:" + questTime.Quest.QuestReward.RewardExp)
 	}
 	if len(questTime.Quest.QuestReward.RewardLocalQuality) != 0 {
-		fmt.Println("		LocalQ:" + questTime.Quest.QuestReward.RewardLocalQuality)
+		fmt.Print(" LQ:" + questTime.Quest.QuestReward.RewardLocalQuality)
 	}
 	if len(questTime.Quest.QuestReward.RewardLocalQualityAdditional) != 0 {
-		fmt.Println("		LocalQAdd:" + questTime.Quest.QuestReward.RewardLocalQualityAdditional)
+		fmt.Print(" LQA:" + questTime.Quest.QuestReward.RewardLocalQualityAdditional)
 	}
 	if len(questTime.Quest.QuestReward.RewardBy) != 0 {
-		fmt.Println("		LocalQ by:" + questTime.Quest.QuestReward.RewardBy)
+		fmt.Print(" BY:" + questTime.Quest.QuestReward.RewardBy)
 	}
 	if len(questTime.Quest.QuestReward.RewardItem) != 0 {
-		fmt.Println("		Item:" + questTime.Quest.QuestReward.RewardItem)
+		fmt.Print(" IT:" + questTime.Quest.QuestReward.RewardItem)
 	}
+	fmt.Print("} ")
 
-	fmt.Println("---------")
+	fmt.Print("}")
 }
