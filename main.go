@@ -18,8 +18,10 @@ func main() {
 	r := gin.Default()
 	r.GET("/api/createdef", controllers.PostCreate)
 	r.POST("/api/create", controllers.PostCreateFromJson)
-	r.GET("/api/getall", controllers.GetAll)
-	//r.GET("/api/getall/qgname", controllers.GetAllQ)
+	r.GET("/api/quests/all", controllers.GetQuests)
+	r.GET("/api/quests/npc/:npc", controllers.GetQuestsNpc)
+	r.GET("/api/quests/quality/:quality", controllers.GetQuestsQuality)
+
 	r.GET("/api/getdescriptions", controllers.GetDescriptions)
 	r.GET("/api/getdescription", controllers.GetDescription)
 	r.GET("/api/getstructures", controllers.GetStructures)
@@ -34,7 +36,7 @@ func main() {
 	r.GET("/api/questgiver/:npc", controllers.GetQuestgiver)
 
 	r.GET("/api/quality/all", controllers.GetQualities)
-	r.GET("/api/quality/:quality", controllers.GetQualityQuestgivers)
+	r.GET("/api/quality/:quality", controllers.GetQualityQuestgiversSum)
 
 	//r.Get("/api/questgiver/quests/:npc") - instead of "/api/getall/qgname"
 

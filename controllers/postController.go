@@ -18,10 +18,10 @@ func PostCreate(c *gin.Context) {
 		Time: time.Now().Unix(),
 		Quest: models.QuestStructure{Content: "Test client", Character: "Nords of Skyrim",
 			QuestReward: models.QuestDescription{
-				QuestgiverName:     "Liefisilus",
+				QuestgiverName:     "QGname",
 				RewardLp:           "",
 				RewardExp:          "",
-				RewardLocalQuality: "Wild Windsown Weed",
+				RewardLocalQuality: "Stinging Nettle",
 				RewardBy:           "1",
 				RewardItem:         "",
 			}},
@@ -38,19 +38,6 @@ func PostCreate(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"questTime": questTime,
 	})
-}
-
-func GetAll(c *gin.Context) {
-	var qt []models.QuestTime
-	initializers.DB.Preload("Quest.QuestReward").
-		Limit(50).
-		Order("id desc").
-		Find(&qt)
-
-	c.JSON(200, gin.H{
-		"array": qt,
-	})
-
 }
 
 func GetDescriptions(c *gin.Context) {
@@ -104,6 +91,10 @@ func PostCreateFromJson(c *gin.Context) {
 		fmt.Println("Error on unmarshalling")
 		c.Status(400)
 		return
+	}
+
+	if receivedQuest.QuestReward.RewardLocalQuality == "Wild Windsown Weed" {
+		receivedQuest.QuestReward.RewardLocalQuality = "WWW"
 	}
 
 	var questTime models.QuestTime

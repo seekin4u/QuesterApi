@@ -8,6 +8,59 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetQuests(c *gin.Context) {
+	var qt []models.QuestTime
+	initializers.DB.Preload("Quest.QuestReward").
+		Limit(50).
+		Order("id desc").
+		Find(&qt)
+
+	c.JSON(200, gin.H{
+		"array": qt,
+	})
+}
+
+func GetQuestsNpc(c *gin.Context) {
+	npc := c.Param("npc")
+	if len(npc) == 0 {
+		npc = ""
+	}
+
+	var quests []models.QuestTime
+	initializers.DB.
+		Joins("JOIN quest_structures on quest_structures.id=quest_id").
+		Joins("JOIN quest_descriptions on quest_descriptions.id=quest_reward_id").
+		Distinct("questgiver_name").
+		Where("questgiver_name = ?", npc).
+		Preload("Quest.QuestReward").
+		Find(&quests)
+
+	c.JSON(200, gin.H{
+		"array": quests,
+	})
+
+}
+
+func GetQuestsQuality(c *gin.Context) {
+	quality := c.Param("quality")
+	if len(quality) == 0 {
+		quality = ""
+	}
+
+	var quests []models.QuestTime
+	initializers.DB.
+		Joins("JOIN quest_structures on quest_structures.id=quest_id").
+		Joins("JOIN quest_descriptions on quest_descriptions.id=quest_reward_id").
+		Where("reward_local_quality = ?", quality).
+		Preload("Quest.QuestReward").
+		Find(&quests)
+
+	c.JSON(200, gin.H{
+		"array": quests,
+	})
+
+}
+
 func GetQuestgivers(c *gin.Context) {
 	var qgs []models.QuestDescription
 	initializers.DB.
@@ -148,7 +201,7 @@ func GetQualities(c *gin.Context) {
 
 }
 
-func GetQualityQuestgivers(c *gin.Context) {
+func GetQualityQuestgiversSum(c *gin.Context) {
 	quality := c.Param("quality")
 	if len(quality) == 0 {
 		quality = ""
@@ -194,6 +247,27 @@ func GetQualityQuestgivers(c *gin.Context) {
 		"ql":  quality,
 		"qgs": qgs,
 		"ups": qualsum,
+	})
+
+}
+
+func GetQualityQuests(c *gin.Context) {
+
+	var qls []models.QuestDescription
+	initializers.DB. //TODO: remove qualities string and give QuestReward set?
+				Distinct("reward_local_quality").
+				Find(&qls)
+
+	var qualities []string
+
+	for _, el := range qls {
+		if len(el.RewardLocalQuality) != 0 && !contains(qualities, el.RewardLocalQuality) {
+			qualities = append(qualities, el.RewardLocalQuality)
+		}
+	}
+
+	c.JSON(200, gin.H{
+		"qls": qualities,
 	})
 
 }
