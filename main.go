@@ -34,6 +34,7 @@ func main() {
 	r.GET("/api/questgiver/:npc", controllers.GetQuestgiver)
 
 	r.GET("/api/quality/all", controllers.GetQualities)
+	r.GET("/api/quality/:quality", controllers.GetQualityQuestgivers)
 
 	//r.Get("/api/questgiver/quests/:npc") - instead of "/api/getall/qgname"
 

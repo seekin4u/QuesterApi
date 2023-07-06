@@ -16,15 +16,14 @@ func PostCreate(c *gin.Context) {
 
 	questTime := models.QuestTime{
 		Time: time.Now().Unix(),
-		Quest: models.QuestStructure{Content: "Test client", Character: "NORDS",
+		Quest: models.QuestStructure{Content: "Test client", Character: "Nords of Skyrim",
 			QuestReward: models.QuestDescription{
-				QuestgiverName:               "",
-				RewardLp:                     "",
-				RewardExp:                    "",
-				RewardLocalQuality:           "",
-				RewardLocalQualityAdditional: "Fox",
-				RewardBy:                     "1",
-				RewardItem:                   "",
+				QuestgiverName:     "Liefisilus",
+				RewardLp:           "",
+				RewardExp:          "",
+				RewardLocalQuality: "Wild Windsown Weed",
+				RewardBy:           "1",
+				RewardItem:         "",
 			}},
 	}
 
@@ -43,7 +42,10 @@ func PostCreate(c *gin.Context) {
 
 func GetAll(c *gin.Context) {
 	var qt []models.QuestTime
-	initializers.DB.Preload("Quest.QuestReward").Find(&qt)
+	initializers.DB.Preload("Quest.QuestReward").
+		Limit(50).
+		Order("id desc").
+		Find(&qt)
 
 	c.JSON(200, gin.H{
 		"array": qt,
@@ -137,9 +139,6 @@ func printRecievedQuest(questTime models.QuestTime) {
 	}
 	if len(questTime.Quest.QuestReward.RewardLocalQuality) != 0 {
 		fmt.Print(" LQ:" + questTime.Quest.QuestReward.RewardLocalQuality)
-	}
-	if len(questTime.Quest.QuestReward.RewardLocalQualityAdditional) != 0 {
-		fmt.Print(" LQA:" + questTime.Quest.QuestReward.RewardLocalQualityAdditional)
 	}
 	if len(questTime.Quest.QuestReward.RewardBy) != 0 {
 		fmt.Print(" BY:" + questTime.Quest.QuestReward.RewardBy)

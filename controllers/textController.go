@@ -10,7 +10,9 @@ import (
 
 func GetQuestgivers(c *gin.Context) {
 	var qgs []models.QuestDescription
-	initializers.DB.Distinct("questgiver_name").Find(&qgs)
+	initializers.DB.
+		Distinct("questgiver_name").
+		Find(&qgs)
 
 	var npcList []string
 
@@ -34,15 +36,13 @@ func GetQuestgiverQualities(c *gin.Context) {
 
 	var qds []models.QuestDescription
 	initializers.DB.Where("questgiver_name = ?", npc).
-		Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").
+		Distinct("questgiver_name", "reward_local_quality").
 		Find(&qds)
 
 	var qualities []string
 	for _, val := range qds {
 		if len(val.RewardLocalQuality) != 0 && !contains(qualities, val.RewardLocalQuality) {
 			qualities = append(qualities, val.RewardLocalQuality)
-		} else if len(val.RewardLocalQualityAdditional) != 0 && !contains(qualities, val.RewardLocalQualityAdditional) {
-			qualities = append(qualities, val.RewardLocalQualityAdditional)
 		}
 	}
 
@@ -87,8 +87,6 @@ func GetQuestgiverQualitiesQuests(c *gin.Context) {
 	for _, val := range qds {
 		if len(val.RewardLocalQuality) != 0 && !contains(qualities, val.RewardLocalQuality) {
 			qualities = append(qualities, val.RewardLocalQuality)
-		} else if len(val.RewardLocalQualityAdditional) != 0 && !contains(qualities, val.RewardLocalQualityAdditional) {
-			qualities = append(qualities, val.RewardLocalQualityAdditional)
 		}
 	}
 
@@ -100,14 +98,12 @@ func GetQuestgiverQualitiesQuests(c *gin.Context) {
 
 func GetQgQlGeneric(c *gin.Context) {
 	var qualities []models.QuestDescription
-	initializers.DB.Where("questgiver_name = ?", "QGname").Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").Find(&qualities)
+	initializers.DB.Where("questgiver_name = ?", "QGname").Distinct("questgiver_name", "reward_local_quality").Find(&qualities)
 
 	var quality []string
 	for _, val := range qualities {
 		if len(val.RewardLocalQuality) != 0 && !contains(quality, val.RewardLocalQuality) {
 			quality = append(quality, val.RewardLocalQuality)
-		} else if len(val.RewardLocalQualityAdditional) != 0 && !contains(quality, val.RewardLocalQualityAdditional) {
-			quality = append(quality, val.RewardLocalQualityAdditional)
 		}
 	}
 
@@ -124,7 +120,7 @@ func GetQuestgiver(c *gin.Context) {
 	}
 
 	var qualities []models.QuestDescription
-	initializers.DB.Where("questgiver_name = ?", npc).Distinct("questgiver_name", "reward_local_quality", "reward_local_quality_additional").Find(&qualities)
+	initializers.DB.Where("questgiver_name = ?", npc).Distinct("questgiver_name", "reward_local_quality").Find(&qualities)
 
 	c.JSON(200, gin.H{
 		"ql": qualities,
@@ -134,17 +130,15 @@ func GetQuestgiver(c *gin.Context) {
 func GetQualities(c *gin.Context) {
 
 	var qls []models.QuestDescription
-	initializers.DB.
-		Distinct("reward_local_quality", "reward_local_quality_additional").
-		Find(&qls)
+	initializers.DB. //TODO: remove qualities string and give QuestReward set?
+				Distinct("reward_local_quality").
+				Find(&qls)
 
 	var qualities []string
 
 	for _, el := range qls {
 		if len(el.RewardLocalQuality) != 0 && !contains(qualities, el.RewardLocalQuality) {
 			qualities = append(qualities, el.RewardLocalQuality)
-		} else if len(el.RewardLocalQualityAdditional) != 0 && !contains(qualities, el.RewardLocalQualityAdditional) {
-			qualities = append(qualities, el.RewardLocalQualityAdditional)
 		}
 	}
 
@@ -155,24 +149,51 @@ func GetQualities(c *gin.Context) {
 }
 
 func GetQualityQuestgivers(c *gin.Context) {
-
-	var qls []models.QuestDescription
-	initializers.DB.
-		Distinct("reward_local_quality", "reward_local_quality_additional").
-		Find(&qls)
-
-	var qualities []string
-
-	for _, el := range qls {
-		if len(el.RewardLocalQuality) != 0 && !contains(qualities, el.RewardLocalQuality) {
-			qualities = append(qualities, el.RewardLocalQuality)
-		} else if len(el.RewardLocalQualityAdditional) != 0 && !contains(qualities, el.RewardLocalQualityAdditional) {
-			qualities = append(qualities, el.RewardLocalQualityAdditional)
-		}
+	quality := c.Param("quality")
+	if len(quality) == 0 {
+		quality = ""
 	}
 
+	/*SELECT DISTINCT quest_descriptions.questgiver_name, quest_descriptions.reward_local_quality
+	  FROM quest_descriptions WHERE quest_descriptions.reward_local_quality IS DISTINCT FROM ''
+	  AND quest_descriptions.questgiver_name = 'QGname'
+	  UNION
+	  SELECT DISTINCT quest_descriptions.questgiver_name, quest_descriptions.reward_local_quality_additional
+	  FROM quest_descriptions WHERE quest_descriptions.reward_local_quality_additional IS DISTINCT FROM ''
+	  AND quest_descriptions.questgiver_name = 'QGname'
+
+	SELECT DISTINCT quest_descriptions.questgiver_name FROM quest_descriptions
+	WHERE  quest_descriptions.reward_local_quality = 'Badger'
+	UNION
+	SELECT DISTINCT quest_descriptions.questgiver_name FROM quest_descriptions
+	WHERE  quest_descriptions.reward_local_quality_additional = 'Badger' */
+
+	/*Select("questgiver_name").
+	Where("reward_local_quality IS DISTINCT FROM ''").
+	Distinct("reward_local_quality").
+	Find(&qls)*/
+
+	/*WITH wt AS(
+	SELECT DISTINCT quest_descriptions.id, quest_descriptions.reward_local_quality, quest_descriptions.questgiver_name FROM quest_descriptions WHERE  quest_descriptions.reward_local_quality = 'Badger'
+	UNION
+	SELECT DISTINCT quest_descriptions.id, quest_descriptions.reward_local_quality_additional, quest_descriptions.questgiver_name FROM quest_descriptions WHERE  quest_descriptions.reward_local_quality_additional = 'Badger')
+	select quest_times.id, quest_structures.id, wt.id,  quest_structures.character from quest_times inner join
+	quest_structures  on quest_times.quest_id = quest_structures.id inner join
+	wt on quest_structures.quest_reward_id = wt.id*/
+	var qgs []models.QuestDescription
+	initializers.DB. //TODO: remove qualities string and give QuestReward set?
+				Distinct("questgiver_name").
+				Where("reward_local_quality = ?", quality).
+				Find(&qgs)
+
+	var qualsum int
+	initializers.DB.
+		Raw("SELECT DISTINCT sum(quest_descriptions.reward_by::numeric) from quest_descriptions WHERE quest_descriptions.reward_local_quality = ? group by quest_descriptions.reward_local_quality", quality).Scan(&qualsum)
+
 	c.JSON(200, gin.H{
-		"qls": qualities,
+		"ql":  quality,
+		"qgs": qgs,
+		"ups": qualsum,
 	})
 
 }
