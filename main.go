@@ -28,7 +28,7 @@ func main() {
 	r.GET("/api/getstructure", controllers.GetStructure)
 
 	r.GET("/api/questgiver/all", controllers.GetQuestgivers)
-	r.GET("/api/questgiver/:npc", controllers.GetQuestgiverQualities)
+	r.GET("/api/questgiver/:npc", controllers.GetQuestgiver)
 	r.GET("/api/questgiver/quests/:npc", controllers.GetQuestgiverQuests)
 	r.GET("/api/questgiver/qualitiesquests/:npc", controllers.GetQuestgiverQualitiesQuests)
 

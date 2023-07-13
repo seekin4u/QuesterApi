@@ -3,7 +3,6 @@ package controllers
 import (
 	"QuesterApi/initializers"
 	"QuesterApi/models"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -75,8 +74,6 @@ func GetQuestgivers(c *gin.Context) {
 		}
 	}
 
-	//TODO: add general quantity of EXP and LP from ALL npcs
-
 	var lpsum int
 	initializers.DB.
 		Raw("SELECT sum(quest_descriptions.reward_lp::numeric) from quest_descriptions WHERE quest_descriptions.reward_lp IS DISTINCT FROM ''").Scan(&lpsum)
@@ -85,7 +82,6 @@ func GetQuestgivers(c *gin.Context) {
 	initializers.DB.
 		Raw("SELECT sum(quest_descriptions.reward_exp::numeric) from quest_descriptions WHERE quest_descriptions.reward_exp IS DISTINCT FROM ''").Scan(&expsum)
 
-	fmt.Println(qgs)
 	c.JSON(200, gin.H{
 		"qgs":  npcList,
 		"tlp":  lpsum,
@@ -93,7 +89,7 @@ func GetQuestgivers(c *gin.Context) {
 	})
 }
 
-func GetQuestgiverQualities(c *gin.Context) {
+func GetQuestgiver(c *gin.Context) {
 	npc := c.Param("npc")
 	if len(npc) == 0 {
 		npc = ""
@@ -111,9 +107,19 @@ func GetQuestgiverQualities(c *gin.Context) {
 		}
 	}
 
+	var lpsum int
+	initializers.DB.
+		Raw("SELECT sum(quest_descriptions.reward_lp::numeric) from quest_descriptions WHERE quest_descriptions.questgiver_name = ? AND quest_descriptions.reward_lp IS DISTINCT FROM ''", npc).Scan(&lpsum)
+
+	var expsum int
+	initializers.DB.
+		Raw("SELECT sum(quest_descriptions.reward_exp::numeric) from quest_descriptions WHERE quest_descriptions.questgiver_name = ? AND quest_descriptions.reward_exp IS DISTINCT FROM ''", npc).Scan(&expsum)
+
 	c.JSON(200, gin.H{
-		"qg": npc,
-		"ql": qualities,
+		"qg":   npc,
+		"ql":   qualities,
+		"tlp":  lpsum,
+		"texp": expsum,
 	})
 }
 
@@ -178,7 +184,7 @@ func GetQgQlGeneric(c *gin.Context) {
 	})
 }
 
-func GetQuestgiver(c *gin.Context) {
+func GetQuestgiver1(c *gin.Context) {
 	npc := c.Param("npc")
 	if len(npc) == 0 {
 		npc = ""
