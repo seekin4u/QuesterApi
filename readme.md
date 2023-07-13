@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS public.quest_descriptions
 )
 
 -----------------------------------
+
+migration now automatical in DB INITIALISE.
+
+---------
+docked volume on windows : \\wsl.localhost\docker-desktop-data\data\docker\volumes\questerdeploy_db\_data

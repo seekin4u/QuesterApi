@@ -28,12 +28,12 @@ func main() {
 	r.GET("/api/getstructure", controllers.GetStructure)
 
 	r.GET("/api/questgiver/all", controllers.GetQuestgivers)
-	r.GET("/api/questgiver/qualities/:npc", controllers.GetQuestgiverQualities)
+	r.GET("/api/questgiver/:npc", controllers.GetQuestgiverQualities)
 	r.GET("/api/questgiver/quests/:npc", controllers.GetQuestgiverQuests)
 	r.GET("/api/questgiver/qualitiesquests/:npc", controllers.GetQuestgiverQualitiesQuests)
 
 	r.GET("/api/questgiver/generic", controllers.GetQgQlGeneric) //refactor
-	r.GET("/api/questgiver/:npc", controllers.GetQuestgiver)
+	//r.GET("/api/questgiver/:npc", controllers.GetQuestgiver)
 
 	r.GET("/api/quality/all", controllers.GetQualities)
 	r.GET("/api/quality/:quality", controllers.GetQualityQuestgiversSum)

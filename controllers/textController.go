@@ -75,9 +75,21 @@ func GetQuestgivers(c *gin.Context) {
 		}
 	}
 
+	//TODO: add general quantity of EXP and LP from ALL npcs
+
+	var lpsum int
+	initializers.DB.
+		Raw("SELECT sum(quest_descriptions.reward_lp::numeric) from quest_descriptions WHERE quest_descriptions.reward_lp IS DISTINCT FROM ''").Scan(&lpsum)
+
+	var expsum int
+	initializers.DB.
+		Raw("SELECT sum(quest_descriptions.reward_exp::numeric) from quest_descriptions WHERE quest_descriptions.reward_exp IS DISTINCT FROM ''").Scan(&expsum)
+
 	fmt.Println(qgs)
 	c.JSON(200, gin.H{
-		"qgs": npcList,
+		"qgs":  npcList,
+		"tlp":  lpsum,
+		"texp": expsum,
 	})
 }
 
