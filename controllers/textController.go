@@ -10,7 +10,7 @@ import (
 func GetQuests(c *gin.Context) {
 	var qt []models.QuestTime
 	initializers.DB.Preload("Quest.QuestReward").
-		Limit(50).
+		Limit(200).
 		Order("id desc").
 		Find(&qt)
 
