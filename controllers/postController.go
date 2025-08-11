@@ -6,25 +6,50 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+func randomChoice[T any](options []T) T {
+	return options[rand.Intn(len(options))]
+}
+
 func PostCreate(c *gin.Context) {
+
+	rand.Seed(time.Now().UnixNano())
+
+	questgivers := []string{
+		"Elder Brynjolf",
+		"Lady Mira",
+		"Captain Rurik",
+		"Thane Astrid",
+	}
+	rewardLps := []string{"5", "10", "15", "20"}
+	rewardExps := []string{"100", "250", "500", "750"}
+	rewardQualities := []string{
+		"Stinging Nettle",
+		"Dragon's Breath",
+		"Shadow Silk",
+		"Golden Oak",
+	}
 
 	questTime := models.QuestTime{
 		Time: time.Now().Unix(),
-		Quest: models.QuestStructure{Content: "Test client", Character: "Nords of Skyrim",
+		Quest: models.QuestStructure{
+			Content:   "Test client",
+			Character: "Nords of Skyrim",
 			QuestReward: models.QuestDescription{
-				QuestgiverName:     "QGname",
-				RewardLp:           "",
-				RewardExp:          "",
-				RewardLocalQuality: "Stinging Nettle",
+				QuestgiverName:     randomChoice(questgivers),
+				RewardLp:           randomChoice(rewardLps),
+				RewardExp:          randomChoice(rewardExps),
+				RewardLocalQuality: randomChoice(rewardQualities),
 				RewardBy:           "1",
-				RewardItem:         "",
-			}},
+				RewardItem:         "testItem",
+			},
+		},
 	}
 
 	result := initializers.DB.Create(&questTime)

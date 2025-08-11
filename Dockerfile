@@ -1,28 +1,17 @@
-FROM golang:latest as builder
-
-ENV GO111MODULE=on
-
+FROM golang:1.22-alpine AS build
 WORKDIR /app
 
+RUN apk add --no-cache git ca-certificates && update-ca-certificates
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-#COPY .env ./
-#COPY controllers/* ./
-#COPY initializers/* ./
-#COPY migrate/migrate.go ./
-#COPY models/QuestModel.go ./
-#COPY main.go ./
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o backend .
 
-RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build
-
-FROM scratch
-
+FROM gcr.io/distroless/base-debian12:nonroot
 WORKDIR /app
-COPY --from=builder /app/.env .
-COPY --from=builder /app/QuesterApi .
-
+COPY --from=build /app/backend /app/backend
+COPY .env ./
+USER nonroot:nonroot
 EXPOSE 3000
-
-CMD ["/app/QuesterApi"]
+ENTRYPOINT ["/app/backend"]
